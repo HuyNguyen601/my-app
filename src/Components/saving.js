@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import logo from './logo.png';
 import MyTable from './MyTable'
-import Address from './Address'
 import './App.css';
+import SignUpPage from './Components/SignUp'
 import {
   Collapse,
   Navbar,
@@ -80,7 +80,6 @@ class App extends Component {
         </Navbar>
 
       </div>
-        <Address />
         <MyTable/>
     </div>);
   }
