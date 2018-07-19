@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import logo from './logo.png';
 import MyTable from './MyTable'
+import Address from './Address'
 import './App.css';
 import {
   Collapse,
@@ -77,7 +78,9 @@ class App extends Component {
             </Nav>
           </Collapse>
         </Navbar>
+
       </div>
+        <Address />
         <MyTable/>
     </div>);
   }
