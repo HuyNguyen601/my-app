@@ -17,7 +17,7 @@ const INITIAL_STATE = {
   error: null
 };
 
-const byPropKey = (propertyName, value) => () => ({
+const byPropKey = (propertyName, value) => ({
 [propertyName]: value,
 });
 
