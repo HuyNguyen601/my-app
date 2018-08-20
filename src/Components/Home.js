@@ -1,8 +1,9 @@
 import React from 'react';
+import MyTable from './MyTable.js';
 
-const HomePage = () =>
+const Home = () =>
   <div>
-    <h1>Landing Page</h1>
+    <MyTable />
   </div>
 
-export default HomePage;
+export default Home

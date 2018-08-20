@@ -58,7 +58,6 @@ class Navigation extends React.Component  {
             <Button color="inherit" onClick={this.toggle}>Login</Button>
           </Toolbar>
         </AppBar>
-        <SignInModal isOpen = {this.state.modal} toggle={this.toggle}/>
 
       </div>
     );

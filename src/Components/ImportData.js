@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import XLS from 'xlsx'
+import XLSX from 'xlsx'
 class ImportData extends Component {
 
   constructor(props) {
@@ -16,10 +16,10 @@ class ImportData extends Component {
 
   handleOnload(event){
       const data = event.target.result;
-      const workbook = XLS.read(data, {type: 'binary'});
+      const workbook = XLSX.read(data, {type: 'binary'});
       const sheet_name_list = workbook.SheetNames;
       sheet_name_list.forEach( function(y) {
-        const exceljson = XLS.utils.sheet_to_json(workbook.Sheets[y]);
+        const exceljson = XLSX.utils.sheet_to_json(workbook.Sheets[y]);
         this.props.onDataChange(exceljson);
       }, this);
   };
