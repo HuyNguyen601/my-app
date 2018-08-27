@@ -6,9 +6,11 @@ import {
   PagingState,
   IntegratedPaging,
   SearchState,
-  IntegratedFiltering
+  IntegratedFiltering,
+  SortingState,
+  IntegratedSorting,
 } from '@devexpress/dx-react-grid';
-import {Grid, Table, TableHeaderRow, PagingPanel, Toolbar, SearchPanel
+import {Grid, Table, TableHeaderRow, PagingPanel, Toolbar, SearchPanel,
 } from '@devexpress/dx-react-grid-material-ui';
 
 
@@ -45,11 +47,11 @@ export default class MyTable extends React.PureComponent {
         },
         {
           name: 'weight',
-          title: 'Weight'
+          title: 'Weight(lbs)'
         },
         {
           name: 'amount',
-          title: 'Amount'
+          title: 'Amount($)'
         }
       ],
       rows: [
@@ -58,15 +60,17 @@ export default class MyTable extends React.PureComponent {
         }
       ],
       searchValue: '',
+      sorting: [{columnName: 'amount', direction: 'desc'}],
       pageSizes: [10,20,30,50,100, 0]
     };
     this.changeRowValue = value => this.setState({rows: value});
+    this.changeSorting = sorting => this.setState({sorting});
     //database.initializeTable(this.changeRowValue);
 
     this.handleChange = this.handleChange.bind(this);
     this.changeSearchValue = value => this.setState({searchValue: value});
   }
-  componentWillMount(){
+  componentDidMount(){
     database.initializeTable(this.changeRowValue);
   }
 
@@ -78,7 +82,7 @@ export default class MyTable extends React.PureComponent {
   }
 
   render() {
-    const {rows, columns,searchValue, pageSizes} = this.state;
+    const {rows, columns,searchValue,sorting, pageSizes} = this.state;
 
     return (<React.Fragment>
       <Paper>
@@ -87,11 +91,16 @@ export default class MyTable extends React.PureComponent {
             value={searchValue}
             onValueChange={this.changeSearchValue}
           />
+          <SortingState
+            sorting={sorting}
+            onSortingChange={this.changeSorting}
+          />
+          <IntegratedSorting />
           <PagingState defaultCurrentPage={0} pageSize={10}/>
           <IntegratedFiltering/>
           <IntegratedPaging/>
           <Table/>
-          <TableHeaderRow/>
+          <TableHeaderRow showSortingControls/>
           <Toolbar />
           <SearchPanel />
           <PagingPanel pageSizes={pageSizes}/>

@@ -1,5 +1,6 @@
 import {db, database} from './firebase'
 // db for firestore, database for realtime database
+/*
 export const initializeDatabase = (data)=> {
   data.forEach(element => {
     db.collection('Orders').add({
@@ -19,13 +20,14 @@ export const initializeDatabase = (data)=> {
       console.log("Error adding order: ", error);
     });
   });
-};
+};*/
 
 export const initializeTable = (changeRowValue) =>{
-  db.collection('Orders').get().then(function(querySnapshot){
+  database.ref().once('value').then(function(snapshot){
+    const data = snapshot.val()
     const result = [];
-    querySnapshot.forEach(doc => {
-      result.push(doc.data());
+    Object.keys(data).forEach(key => {
+      result.push(data[''+key]);
     });
     changeRowValue(result);
   });
