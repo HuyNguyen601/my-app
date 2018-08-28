@@ -7,8 +7,11 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 //GRID
-import {EditingState} from '@devexpress/dx-react-grid';
-import {Grid, Table, TableHeaderRow, TableEditRow, TableEditColumn} from '@devexpress/dx-react-grid-material-ui';
+import {EditingState, SummaryState, IntegratedSummary} from '@devexpress/dx-react-grid';
+import {Grid, Table, TableHeaderRow, TableEditRow, TableEditColumn, TableSummaryRow} from '@devexpress/dx-react-grid-material-ui';
+
+//icons
+
 
 //FIREBASE database
 import {database} from '../firebase'
@@ -48,6 +51,11 @@ class Shipment extends React.Component {
           name: 'total',
           title: 'Total'
         }
+      ],
+      totalSummaryItems: [
+        { columnName: 'total', type: 'sum' },
+        { columnName: 'weight', type: 'sum' },
+        { columnName: 'unit', type: 'sum' },
       ],
       tableColumnExtensions: [
       //  { columnName: 'description', width: 100 },
@@ -194,6 +202,7 @@ class Shipment extends React.Component {
       rAddress,
       rows,
       columns,
+      totalSummaryItems,
       tableColumnExtensions,
       editingRowIds,
       addedRows,
@@ -269,10 +278,15 @@ class Shipment extends React.Component {
                       addedRows={addedRows} onAddedRowsChange={this.changeAddedRows}
                       onCommitChanges={this.commitChanges}
                       columnExtensions={[{columnName: 'total', editingEnabled: false}]}/>
+                      <SummaryState
+                        totalItems={totalSummaryItems}
+                        />
+                    <IntegratedSummary />
                     <Table columnExtensions={tableColumnExtensions}/>
                     <TableHeaderRow/>
                     <TableEditRow/>
                     <TableEditColumn showAddCommand={!addedRows.length} showEditCommand showDeleteCommand/>
+                    <TableSummaryRow />
                   </Grid>
                 </div><br/><br/><br/><br/>
                 <button className= "btn btn-success form-control" onClick={this.submitData}> {this.props.name} </button>
