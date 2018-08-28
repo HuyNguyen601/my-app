@@ -1,34 +1,40 @@
-import {db, database} from './firebase'
-// db for firestore, database for realtime database
-/*
-export const initializeDatabase = (data)=> {
-  data.forEach(element => {
-    db.collection('Orders').add({
-      orderID: element['Order ID'],
-      date: typeof element['Order date'] !== 'undefined' ? element['Order date'] : '' ,
-      sName: element['Sender Name'],
-      sPhone: element['Sender Phone'],
-      sAddress: element['Sender Address'],
-      rName: element['Receiver Name'],
-      rPhone: element['Receiver Phone'],
-      rAddress: element['Receiver Address'],
-      weight: element['Total Weight'],
-      amount: element['Total Amount']
-    }).then(function(docRef){
-      console.log("Order written with ID: ",docRef.id);
-    }).catch(function(error){
-      console.log("Error adding order: ", error);
-    });
-  });
-};*/
+import {firestore, database} from './firebase'
 
-export const initializeTable = (changeRowValue) =>{
-  database.ref().once('value').then(function(snapshot){
+//realtime database
+export const addShipment= (data)=>{
+  const shipmentNode = database.ref("/Shipments").push();
+  const count = database.ref("/Count");
+  count.once('value').then(function(snapshot){
+    const id = snapshot.val().count+1;
+    count.set({count: id});
+    shipmentNode.set({id: id});
+    shipmentNode.set({...data});
+  });
+}
+
+export const initializeTable = (callback) =>{
+  database.ref('/Shipments').once('value').then(function(snapshot){
     const data = snapshot.val()
     const result = [];
     Object.keys(data).forEach(key => {
       result.push(data[''+key]);
     });
-    changeRowValue(result);
+    callback(result);
   });
+}
+
+
+
+//firestore
+export const addUser = (user) => {
+  const userDB = firestore.collection('Users');
+  userDB.doc(user.phone).set({name: user.name, address: user.address});
 };
+
+export const getUser = (phone, callback) => {
+  const docRef = firestore.collection('Users').doc(phone);
+  docRef.get().then(function(doc){
+    if(doc.exists)
+      callback(doc.data());
+  });
+}

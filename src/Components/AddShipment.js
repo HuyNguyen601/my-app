@@ -11,8 +11,7 @@ class AddShipmentPage extends React.Component {
     return(
       <Paper>
         <div className = 'container-fluid'>
-          <h1> ADD SHIPMENT </h1> <br/> <br/>
-          <Shipment />
+          <Shipment name='ADD SHIPMENT'/>
         </div>
       </Paper>
     );

@@ -63,7 +63,6 @@ export default class MyTable extends React.PureComponent {
       sorting: [{columnName: 'amount', direction: 'desc'}],
       pageSizes: [10,20,30,50,100, 0]
     };
-    this.changeRowValue = value => this.setState({rows: value});
     this.changeSorting = sorting => this.setState({sorting});
     //database.initializeTable(this.changeRowValue);
 
@@ -71,7 +70,9 @@ export default class MyTable extends React.PureComponent {
     this.changeSearchValue = value => this.setState({searchValue: value});
   }
   componentDidMount(){
-    database.initializeTable(this.changeRowValue);
+    database.initializeTable(function(value){
+      this.setState({rows: value});
+    }.bind(this));
   }
 
 
