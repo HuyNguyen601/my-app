@@ -7,8 +7,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 //GRID
-import {EditingState, SummaryState, IntegratedSummary} from '@devexpress/dx-react-grid';
-import {Grid, Table, TableHeaderRow, TableEditRow, TableEditColumn, TableSummaryRow} from '@devexpress/dx-react-grid-material-ui';
+import {EditingState} from '@devexpress/dx-react-grid';
+import {Grid, Table, TableHeaderRow, TableEditRow, TableEditColumn} from '@devexpress/dx-react-grid-material-ui';
 
 //icons
 
@@ -23,6 +23,7 @@ class Shipment extends React.Component {
     this.state = {
       date: moment(),
       shipment_date: moment(),
+      id: 0,
       sName: '',
       sPhone: '',
       sAddress: '',
@@ -30,6 +31,9 @@ class Shipment extends React.Component {
       rPhone: '',
       rAddress: '',
       description: '',
+      total_amount: 0,
+      total_weight: 0,
+      total_unit: 0,
       rows: [],
       columns: [
         {
@@ -80,7 +84,21 @@ class Shipment extends React.Component {
     this.getUserInfo = this.getUserInfo.bind(this);
     //submit shipment data to database
     this.submitData = this.submitData.bind(this);
+    //get shipment details
+    this.getShipmentDetails = this.getShipmentDetails.bind(this);
   }
+
+  componentDidMount() {
+    this.props.shipment ? this.getShipmentDetails(this.props.id) :'';
+  }
+
+  //read data
+  getShipmentDetails(id){
+    database.getShipment(id, data=> this.setState({...data}));
+
+  }
+
+
   validateInput(e,sender)
   {
     let result = '';
@@ -106,7 +124,7 @@ class Shipment extends React.Component {
   }
 
   submitData(){
-    const {sPhone, sName, sAddress, rPhone, rName, rAddress, shipment_date, description, rows} = this.state;
+    const {id, sPhone, sName, sAddress, rPhone, rName, rAddress, shipment_date, description, rows, total_unit, total_weight, total_amount} = this.state;
     if(sPhone.length === 0)
     {
       alert("Please Enter Sender's Phone Number!");
@@ -122,16 +140,21 @@ class Shipment extends React.Component {
     database.addUser(sender);
     database.addUser(receiver);
     const shipment = {};
+    shipment.id = id;
     shipment.sPhone = sPhone;
     shipment.sName = sName;
     shipment.sAddress = sAddress;
     shipment.rPhone = rPhone;
     shipment.rName = rName;
     shipment.rAddress = rAddress;
-    shipment.date = shipment_date.format('MM-DD-YYYY');
-    shipment.items = rows;
+    shipment.shipment_date = typeof shipment_date === 'string' ? shipment_date : shipment_date.format('MM-DD-YYYY');
+    shipment.rows = rows;
     shipment.description = description;
-    database.addShipment(shipment);
+    shipment.total_unit = total_unit;
+    shipment.total_weight = total_weight;
+    shipment.total_amount = total_amount;
+    this.props.shipment ? database.updateShipment(shipment, this.props.id) : database.addShipment(shipment);
+    window.location.href = '/';
   }
 
   //function for GRID
@@ -157,6 +180,9 @@ class Shipment extends React.Component {
   }
 
   commitChanges({added, changed, deleted}) {
+    let total_amount = 0;
+    let total_weight = 0;
+    let total_unit = 0;
     let {rows} = this.state;
     if (added) {
       const startingAddedId = rows.length > 0
@@ -184,22 +210,32 @@ class Shipment extends React.Component {
       rows = rows.filter(row => !deletedSet.has(row.id));
     }
     rows.forEach(row=>{
-      row.total = row.weight*row.wprice + row.unit*row.uprice;
-      console.log(row.weight,row.wprice,row.unit,row.uprice);
+      row.weight = parseFloat(row.weight).toFixed(2);
+      row.wprice = parseFloat(row.wprice).toFixed(2);
+      row.unit = parseFloat(row.unit).toFixed(2);
+      row.uprice = parseFloat(row.uprice).toFixed(2);
+      row.total = (row.weight*row.wprice + row.unit*row.uprice).toFixed(2);
+      total_unit = (parseFloat(row.unit) + parseFloat(total_unit)).toFixed(2);
+      total_weight = (parseFloat(row.weight) + parseFloat(total_weight)).toFixed(2);
+      total_amount = (parseFloat(row.total) + parseFloat(total_amount)).toFixed(2);
     });
-    this.setState({rows});
+    this.setState({rows, total_unit, total_weight, total_amount});
   }
 
   render() {
     const {
       date,
-      shipment_date,
+      id,
       sPhone,
       sName,
       sAddress,
       rPhone,
       rName,
       rAddress,
+      description,
+      total_weight,
+      total_unit,
+      total_amount,
       rows,
       columns,
       totalSummaryItems,
@@ -208,15 +244,20 @@ class Shipment extends React.Component {
       addedRows,
       rowChanges
     } = this.state; // moment type
+
+    const name = this.props.shipment ? ("SHIPMENT DETAIL - SHIPMENT ID: "+id) : "ADD SHIPMENT";
+
+    const shipment_date = (typeof this.state.shipment_date === 'string') ? moment(this.state.shipment_date,'MM-DD-YYYY') : this.state.shipment_date;
     const us_date = date.tz('America/Los_Angeles').format('MM-DD-YYYY');
     const us_time = date.tz('America/Los_Angeles').format('hh:mm a');
     const vn_date = date.tz('Asia/Ho_Chi_Minh').format('DD-MM-YYYY');
     const vn_time = date.tz('Asia/Ho_Chi_Minh').format('hh:mm a');
 
+
     return (
       <React.Fragment>
         <div className='container'>
-          <h1> {this.props.name} </h1> <br/> <br/>
+          <h1> {name} </h1> <br/> <br/>
           <p>Date(US): {us_date}
             - Time: {us_time}</p>
           <p>Date(Vietnam): {vn_date}
@@ -261,11 +302,11 @@ class Shipment extends React.Component {
             <div className='card-body'>
               <div className='row'>
                 <div className='col-sm-4'>
-                  <label> Date: <DatePicker selected={shipment_date} onChange={value => this.setState({shipment_date: value})}/></label> <br />
+                  Date: <DatePicker selected={shipment_date} onChange={value => this.setState({shipment_date: value})}/> <br />
                   <input type='file' className='form-control'/>
                 </div>
                 <div className='col-sm-8'>
-                  <textarea className='form-control' rows='7' placeholder='Shipment Description' onChange={e=>this.setState({description: e.target.value})}/>
+                  <textarea className='form-control' rows='7' placeholder='Shipment Description' value={description} onChange={e=>this.setState({description: e.target.value})}/>
                 </div>
               </div>
                 <div className='row'>
@@ -278,18 +319,31 @@ class Shipment extends React.Component {
                       addedRows={addedRows} onAddedRowsChange={this.changeAddedRows}
                       onCommitChanges={this.commitChanges}
                       columnExtensions={[{columnName: 'total', editingEnabled: false}]}/>
-                      <SummaryState
-                        totalItems={totalSummaryItems}
-                        />
-                    <IntegratedSummary />
                     <Table columnExtensions={tableColumnExtensions}/>
                     <TableHeaderRow/>
                     <TableEditRow/>
                     <TableEditColumn showAddCommand={!addedRows.length} showEditCommand showDeleteCommand/>
-                    <TableSummaryRow />
                   </Grid>
-                </div><br/><br/><br/><br/>
-                <button className= "btn btn-success form-control" onClick={this.submitData}> {this.props.name} </button>
+                </div>
+                <div className='row'>
+                  <div className='col-sm-3'><p style={{fontWeight: 'bold', textDecoration: 'underline'}}>Total: </p></div>
+                  <div className='col-sm-3'><p>Weight: <span>{total_weight} lbs</span></p></div>
+                  <div className='col-sm-3'><p>Units : <span>{total_unit} </span></p></div>
+                  <div className='col-sm-3'><p>Amount: <span>${total_amount}</span></p></div>
+                </div>
+                <br/><br/><br/><br/>
+
+                <div className = 'row'>
+                  <button className= "btn btn-success form-control" onClick={this.submitData} style={{display: this.props.shipment ? 'none' : 'block'}}> Add Shipment </button>
+                </div>
+                <div className = 'row'>
+                  <div className= 'col-sm-6'>
+                    <button className="btn btn-primary form-control" onClick={this.submitData} style={{display: this.props.shipment ? 'block' : 'none'}}>Update Shipment </button>
+                  </div>
+                  <div className= 'col-sm-6'>
+                    <button className="btn btn-secondary form-control" style={{display: this.props.shipment ? 'block' : 'none'}}>Print Receipt </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

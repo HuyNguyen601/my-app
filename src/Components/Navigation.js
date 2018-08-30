@@ -5,8 +5,6 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 
 const styles = {
   root: {
@@ -31,7 +29,7 @@ class Navigation extends React.Component  {
    this.handleClick = this.handleClick.bind(this);
   }
   handleClick(page){
-    window.location.href =   page === 'add' ? './add' : './';
+    window.location.href =   page === 'add' ? '/add' : '/';
   }
 
 

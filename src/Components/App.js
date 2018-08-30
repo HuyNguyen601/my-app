@@ -7,6 +7,7 @@ import {
 import Navigation from './Navigation';
 import AddShipmentPage from './AddShipment';
 import HomePage from './Home';
+import ShipmentDetailPage from './ShipmentDetailPage';
 
 import * as routes from '../constants/routes';
 
@@ -22,6 +23,7 @@ const App = () =>
         exact path={routes.HOME}
         component={() => <HomePage />}
       />
+      <Route path={routes.SHIPMENTS} render={({match})=><ShipmentDetailPage id={match.params.id}/>}/>
     </div>
   </Router>
 

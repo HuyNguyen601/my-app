@@ -9,16 +9,39 @@ import {
   IntegratedFiltering,
   SortingState,
   IntegratedSorting,
+  SelectionState
 } from '@devexpress/dx-react-grid';
-import {Grid, Table, TableHeaderRow, PagingPanel, Toolbar, SearchPanel,
+import {Grid, Table, TableHeaderRow, PagingPanel, Toolbar, SearchPanel, TableSelection
 } from '@devexpress/dx-react-grid-material-ui';
 
+//react router
+//import {Redirect} from 'react-router-dom'
+
+
+const getRowId = row => row.link;
 
 export default class MyTable extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      tableColumnExtensions: [
+      //  { columnName: 'description', width: 100 },
+        { columnName: 'id', width: 100},
+        { columnName: 'sName', width: 150, align: 'center'},
+        { columnName: 'sPhone', width: 150, align: 'center'},
+        { columnName: 'rName', width: 150, align: 'center'},
+        { columnName: 'rPhone', width: 150, align: 'center'},
+        { columnName: 'sAddress', wordWrapEnabled: true},
+        { columnName: 'rAddress', wordWrapEnabled: true},
+        { columnName: 'total_weight', width: 100},
+        { columnName: 'total_amount', width: 100},
+        { columnName: 'shipment_date', width: 100}
+      ],
       columns: [
+        {
+          name: 'id',
+          title: 'ID'
+        },
         {
           name: 'sName',
           title: 'Sender Name'
@@ -30,7 +53,7 @@ export default class MyTable extends React.PureComponent {
           title: 'Sender Address'
         },
         {
-          name: 'date',
+          name: 'shipment_date',
           title: 'Order Date'
         },
         {
@@ -46,11 +69,11 @@ export default class MyTable extends React.PureComponent {
           title: 'Receiver Address'
         },
         {
-          name: 'weight',
+          name: 'total_weight',
           title: 'Weight(lbs)'
         },
         {
-          name: 'amount',
+          name: 'total_amount',
           title: 'Amount($)'
         }
       ],
@@ -68,6 +91,7 @@ export default class MyTable extends React.PureComponent {
 
     this.handleChange = this.handleChange.bind(this);
     this.changeSearchValue = value => this.setState({searchValue: value});
+    this.toShipMentPage = this.toShipMentPage.bind(this);
   }
   componentDidMount(){
     database.initializeTable(function(value){
@@ -75,6 +99,11 @@ export default class MyTable extends React.PureComponent {
     }.bind(this));
   }
 
+  toShipMentPage(id){
+    const path = '/shipments/' + id;
+    console.log(path);
+    window.location.href= path;
+  }
 
   handleChange(data) {
 
@@ -84,10 +113,9 @@ export default class MyTable extends React.PureComponent {
 
   render() {
     const {rows, columns,searchValue,sorting, pageSizes} = this.state;
-
     return (<React.Fragment>
       <Paper>
-        <Grid rows={rows} columns={columns}>
+        <Grid rows={rows} columns={columns} getRowId={getRowId}>
           <SearchState
             value={searchValue}
             onValueChange={this.changeSearchValue}
@@ -100,8 +128,10 @@ export default class MyTable extends React.PureComponent {
           <PagingState defaultCurrentPage={0} pageSize={10}/>
           <IntegratedFiltering/>
           <IntegratedPaging/>
-          <Table/>
+          <SelectionState onSelectionChange= {id=>this.toShipMentPage(id)}/>
+          <Table columnExtensions={this.state.tableColumnExtensions}/>
           <TableHeaderRow showSortingControls/>
+          <TableSelection selectByRowClick showSelectionColumn={false} />
           <Toolbar />
           <SearchPanel />
           <PagingPanel pageSizes={pageSizes}/>
