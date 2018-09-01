@@ -1,4 +1,4 @@
-import {firestore, database} from './firebase'
+import {firestore, database, storage} from './firebase'
 
 //realtime database
 export const addShipment = (data) => {
@@ -37,16 +37,24 @@ export const initializeTable = (callback) => {
         result.push(obj);
       });
     }
-    console.log(result);
     callback(result);
   });
+}
+//storageBucket
+export const uploadFile = (file, id) => {
+  const ref = storage.ref('/'+id+'/picture');
+  ref.put(file).then(alert('File Uploaded')).catch(function(error){alert('Error: '+error);});
+}
+
+export const downloadFile = (id, callback) => {
+  const ref = storage.ref('/'+id+'/picture');
+  ref.getDownloadURL().then(callback);
 }
 
 //firestore
 export const addUser = (user) => {
   const userDB = firestore.collection('Users');
   userDB.doc(user.phone).set({name: user.name, address: user.address});
-  console.log(user);
 };
 
 export const getUser = (phone, callback) => {

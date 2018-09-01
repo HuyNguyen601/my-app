@@ -14,6 +14,9 @@ import {
 import {Grid, Table, TableHeaderRow, PagingPanel, Toolbar, SearchPanel, TableSelection
 } from '@devexpress/dx-react-grid-material-ui';
 
+//material ui
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 //react router
 //import {Redirect} from 'react-router-dom'
 
@@ -26,16 +29,17 @@ export default class MyTable extends React.PureComponent {
     this.state = {
       tableColumnExtensions: [
       //  { columnName: 'description', width: 100 },
-        { columnName: 'id', width: 100},
-        { columnName: 'sName', width: 150, align: 'center'},
-        { columnName: 'sPhone', width: 150, align: 'center'},
-        { columnName: 'rName', width: 150, align: 'center'},
-        { columnName: 'rPhone', width: 150, align: 'center'},
+        { columnName: 'id', width: 80},
+        { columnName: 'sName', width: 150},
+        { columnName: 'sPhone', width: 120},
+        { columnName: 'rName', width: 150},
+        { columnName: 'rPhone', width: 120},
         { columnName: 'sAddress', wordWrapEnabled: true},
         { columnName: 'rAddress', wordWrapEnabled: true},
         { columnName: 'total_weight', width: 100},
         { columnName: 'total_amount', width: 100},
-        { columnName: 'shipment_date', width: 100}
+        { columnName: 'shipment_date', width: 100},
+        { columnName: 'status', width: 100}
       ],
       columns: [
         {
@@ -83,19 +87,24 @@ export default class MyTable extends React.PureComponent {
         }
       ],
       searchValue: '',
-      sorting: [{columnName: 'amount', direction: 'desc'}],
+      sorting: [{columnName: 'status', direction: 'asc'}],
+      fullRows: [],
+      status: 'Processing',
       pageSizes: [10,20,30,50,100, 0]
     };
     this.changeSorting = sorting => this.setState({sorting});
     //database.initializeTable(this.changeRowValue);
 
-    this.handleChange = this.handleChange.bind(this);
     this.changeSearchValue = value => this.setState({searchValue: value});
     this.toShipMentPage = this.toShipMentPage.bind(this);
+    this.changeTab = this.changeTab.bind(this);
   }
   componentDidMount(){
     database.initializeTable(function(value){
-      this.setState({rows: value});
+      this.setState({fullRows: value});
+      const fullRows = this.state.fullRows;
+      this.state.status === 'All' ? this.setState({rows: fullRows})
+                                  : this.setState({rows: fullRows.filter(row=>row.status === this.state.status) });
     }.bind(this));
   }
 
@@ -105,16 +114,22 @@ export default class MyTable extends React.PureComponent {
     window.location.href= path;
   }
 
-  handleChange(data) {
-
-      //Initialize database with initial data, remember to check if data.length >0 for xls read
-      //database.initializeDatabase(data);
+  changeTab(value) {
+    this.setState({status: value});
+    const {fullRows, columns} = this.state;
+    value === 'All' ? this.setState({rows: fullRows, columns: [...columns,{name:'status', title: 'Status'}]})
+                                : this.setState({rows: fullRows.filter(row=>row.status === value)});
   }
 
   render() {
-    const {rows, columns,searchValue,sorting, pageSizes} = this.state;
+    const {rows, columns,searchValue,sorting, pageSizes, status} = this.state;
     return (<React.Fragment>
       <Paper>
+        <Tabs value={status} onChange={(e,value)=>this.changeTab(value)} indicatorColor ='primary'>
+          <Tab value='Processing' label="Processing" />
+          <Tab value='Shipped' label="Shipped" />
+          <Tab value='All' label="All" />
+        </Tabs>
         <Grid rows={rows} columns={columns} getRowId={getRowId}>
           <SearchState
             value={searchValue}

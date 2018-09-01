@@ -4,10 +4,7 @@ import Shipment from './Shipment';
 
 
 class ShipmentDetailPage extends React.Component {
-  constructor(props)
-  {
-    super(props);
-  }
+
   render(){
 
     return(

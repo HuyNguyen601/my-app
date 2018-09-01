@@ -1,21 +1,13 @@
 import { auth } from './firebase'
 
-// Sign Up
-export const doCreateUserWithEmailAndPassword = (email, password) =>
-  auth.createUserWithEmailAndPassword(email, password);
-
 // Sign In
-export const doSignInWithEmailAndPassword = (email, password) =>
-  auth.signInWithEmailAndPassword(email, password);
+export const checkAuthentication = (email, password, success, error) => auth.setPersistence(auth.Auth.Persistence.SESSION)
+.then(function(email, password){
+  return auth.signInWithEmailAndPassword(email, password);
+}).then(success).catch(error);
 
-// Sign out
-export const doSignOut = () =>
-  auth.signOut();
+export const watchChange  = (callback) => auth.onAuthStateChanged(function(user){
+  callback(user);
+});
 
-  // Password Reset
-export const doPasswordReset = (email) =>
-  auth.sendPasswordResetEmail(email);
-
-// Password Change
-export const doPasswordUpdate = (password) =>
-  auth.currentUser.updatePassword(password);
+export const getUser = ()=>auth.getCurrentUser;
